@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Таймер с уведомлением</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    input, button { font-size: 16px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Таймер</h1>
+
+  <label for="minutes">Минут:</label>
+  <input type="number" id="minutes" value="2" min="1" />
+  <br />
+  <button onclick="startTimer()">Старт</button>
+
+  <p id="status"></p>
+
+  <script>
+    async function requestPermission() {
+      if (Notification.permission !== "granted") {
+        await Notification.requestPermission();
+      }
+    }
+
+    async function startTimer() {
+      await requestPermission();
+
+      const minutes = parseInt(document.getElementById("minutes").value);
+      const ms = minutes * 60 * 1000;
+      document.getElementById("status").innerText = `Таймер на ${minutes} мин...`;
+
+      setTimeout(() => {
+        navigator.serviceWorker.ready.then(swReg => {
+          swReg.showNotification("Таймер завершён", {
+            body: "Время вышло!",
+            icon: "icon.png"
+          });
+        });
+        document.getElementById("status").innerText = "Готово!";
+      }, ms);
+    }
+  </script>
+</body>
+</html>
